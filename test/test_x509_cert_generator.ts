@@ -19,8 +19,8 @@ const theTestX509CertificateGeneratorVector = [
         name: "CN=Test, O=Дом",
         subject: "CN=Test, O=Дом",
         issuer: "CN=Test, O=Дом",
-        notBefore: new Date("2020/01/01"),
-        notAfter: new Date("2040/01/02"),
+        notBefore: new Date(Date.UTC(2020, 0, 1, 8, 0, 0)),
+        notAfter: new Date(Date.UTC(2040, 0, 2, 8, 0, 0)),
         signingAlgorithm: alg,
         extensions: [
           new x509.BasicConstraintsExtension(true, 2, true),
@@ -34,7 +34,9 @@ const theTestX509CertificateGeneratorVector = [
         ]
       },
 
-      testDate: new Date("2020/01/02"),
+      testDate: new Date(Date.UTC(2040, 0, 1, 8, 0, 1)),
+      testAfter: new Date(Date.UTC(2040, 0, 3, 0, 0, 1)),
+      testBefore: new Date(Date.UTC(2019, 0, 1, 0, 0, 1)),
 
       certPem:
 `-----BEGIN CERTIFICATE-----
@@ -101,6 +103,12 @@ function testCertPreSigned(testEntry:any) {
 
     const ok = await cert.verify({ date: testEntry.testDate });
     assert.strictEqual(ok, true);
+
+    const validAfter = await cert.verify({ date: testEntry.testAfter });
+    assert.strictEqual(validAfter, false);
+
+    const validBefore = await cert.verify({ date: testEntry.testBefore });
+    assert.strictEqual(validBefore, false);
 
   });
 }
